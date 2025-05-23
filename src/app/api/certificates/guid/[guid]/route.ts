@@ -1,15 +1,15 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongoose';
 import Certificate from '@/models/Certificate';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { guid: string } }
-) {
+export async function GET(request: NextRequest, { params }: any) {
+  const param = await params;
   try {
     await connectToDatabase();
     
-    const certificate = await Certificate.findOne({ guid: params.guid });
+    const certificate = await Certificate.findOne({ guid: param.guid });
     
     if (!certificate) {
       return NextResponse.json(
