@@ -24,16 +24,21 @@ export default function CertificateEditor({ certificate, onCertificateUpdated }:
     
     let totalWeight = 0;
     products.forEach(product => {
-      // Convert comma-separated numbers if needed
-      const quantity = parseFloat(product.quantity.replace(',', '.'));
+      // Handle numbers with commas as thousand separators (e.g., "3,200.00")
+      const cleanedQuantity = product.quantity.replace(/,/g, '');
+      const quantity = parseFloat(cleanedQuantity);
       if (!isNaN(quantity)) {
         totalWeight += quantity;
       }
     });
     
-    return totalWeight.toFixed(3);
+    // Format the result with comma thousands separators
+    return totalWeight.toLocaleString('en-US', {
+      minimumFractionDigits: 3,
+      maximumFractionDigits: 3
+    });
   };
-  
+
   // Get the display weight (either from invoice or calculated)
   const getDisplayWeight = (): string => {
     const invoiceWeight = parseFloat(formData.invoice.totalWeight);
@@ -62,13 +67,35 @@ export default function CertificateEditor({ certificate, onCertificateUpdated }:
     });
   };
 
-  // Handle product input changes
+  // Format user input for quantity to include commas for thousands
+  const formatQuantity = (value: string): string => {
+    // Remove all commas first
+    const cleanedValue = value.replace(/,/g, '');
+    // Parse as float
+    const numValue = parseFloat(cleanedValue);
+    
+    if (isNaN(numValue)) {
+      return value; // Return original if not a valid number
+    }
+    
+    // Format with commas for thousands
+    return numValue.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  };
+
+  // Handle product input changes with number formatting
   const handleProductChange = (index: number, field: string, value: string) => {
     const updatedProducts = [...formData.products];
-    updatedProducts[index] = { ...updatedProducts[index], [field]: value };
     
-    // If quantity changed, update the total weight
     if (field === 'quantity') {
+      // Only format if it's a numeric field
+      updatedProducts[index] = { 
+        ...updatedProducts[index], 
+        [field]: value 
+      };
+      
       setFormData({
         ...formData,
         products: updatedProducts,
@@ -78,6 +105,7 @@ export default function CertificateEditor({ certificate, onCertificateUpdated }:
         }
       });
     } else {
+      updatedProducts[index] = { ...updatedProducts[index], [field]: value };
       setFormData({
         ...formData,
         products: updatedProducts
@@ -466,6 +494,10 @@ export default function CertificateEditor({ certificate, onCertificateUpdated }:
                         type="text"
                         value={formData.products[index]?.quantity || ''}
                         onChange={(e) => handleProductChange(index, 'quantity', e.target.value)}
+                        onBlur={(e) => {
+                          const formattedValue = formatQuantity(e.target.value);
+                          handleProductChange(index, 'quantity', formattedValue);
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 rounded"
                       />
                     ) : (

@@ -114,13 +114,19 @@ export default function CertificateVerification() {
         
         let totalWeight = 0;
         products.forEach(product => {
-            const quantity = parseFloat(product.quantity.replace(',', '.'));
+            // Handle numbers with commas as thousand separators (e.g., "3,200.00")
+            const cleanedQuantity = product.quantity.replace(/,/g, '');
+            const quantity = parseFloat(cleanedQuantity);
             if (!isNaN(quantity)) {
                 totalWeight += quantity;
             }
         });
         
-        return totalWeight.toFixed(3);
+        // Format the result with comma thousands separators
+        return totalWeight.toLocaleString('en-US', {
+            minimumFractionDigits: 3,
+            maximumFractionDigits: 3
+        });
     };
     
     // Get display weight (either from invoice or calculate it)

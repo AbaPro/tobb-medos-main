@@ -100,9 +100,19 @@ CertificateSchema.pre('save', function(next) {
     // Calculate total weight
     let totalWeight = 0;
     this.products.forEach((product) => {
-      totalWeight += parseFloat(product.quantity.replace(',', '.'));
+      // Handle numbers with commas as thousand separators (e.g., "3,200.00")
+      const cleanedQuantity = product.quantity.replace(/,/g, '');
+      const quantity = parseFloat(cleanedQuantity);
+      if (!isNaN(quantity)) {
+        totalWeight += quantity;
+      }
     });
-    this.invoice.totalWeight = totalWeight.toFixed(3);
+    
+    // Format the total weight with comma thousands separators
+    this.invoice.totalWeight = totalWeight.toLocaleString('en-US', {
+      minimumFractionDigits: 3,
+      maximumFractionDigits: 3
+    });
   }
 
   // Generate a GUID if one doesn't exist
