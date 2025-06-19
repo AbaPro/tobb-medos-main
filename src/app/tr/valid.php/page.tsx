@@ -138,6 +138,16 @@ export default function CertificateVerification() {
         return certificate.invoice.totalWeight;
     };
 
+    // Function to convert newlines to HTML breaks
+    const formatDescription = (description: string) => {
+        return description.split('\n').map((line, index) => (
+            <span key={index}>
+                {line}
+                {index < description.split('\n').length - 1 && <br />}
+            </span>
+        ));
+    };
+
     if (loading) {
         return (
             <div className="container-fluid">
@@ -297,7 +307,7 @@ export default function CertificateVerification() {
                             {certificate.products.map((product, index) => (
                                 <tr key={index}>
                                     <td className="col-sm-9">
-                                        {product.description}
+                                        {formatDescription(product.description)}
                                     </td>
                                     <td className="text-right">
                                         {product.quantity} {product.unit}
