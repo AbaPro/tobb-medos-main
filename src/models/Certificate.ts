@@ -94,9 +94,6 @@ const CertificateSchema = new Schema({
 // Auto-calculate totals before saving
 CertificateSchema.pre('save', function(next) {
   if (this.products && this.products.length > 0 && this.invoice) {
-    // Calculate total packages
-    this.invoice.totalPackages = this.products.length.toString();
-    
     // Calculate total weight
     let totalWeight = 0;
     this.products.forEach((product) => {

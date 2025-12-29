@@ -1,6 +1,6 @@
 /* eslint-disable  @typescript-eslint/no-unused-vars */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Clipboard, RefreshCw } from 'lucide-react';
 import { Certificate, Product, CertificateApiResponse } from '@/types';
 
@@ -17,6 +17,12 @@ export default function CertificateEditor({ certificate, onCertificateUpdated }:
   const [formData, setFormData] = useState<Certificate>(certificate);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [copiedGuid, setCopiedGuid] = useState<boolean>(false);
+
+  // Update formData when certificate prop changes
+  useEffect(() => {
+    setFormData(certificate);
+    setIsEditing(false); // Exit edit mode when switching certificates
+  }, [certificate]);
 
   // Calculate the total weight from products
   const calculateTotalWeight = (products: Product[]): string => {
@@ -565,8 +571,16 @@ export default function CertificateEditor({ certificate, onCertificateUpdated }:
           
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">Total Packages</label>
-            <p className="px-3 py-2 bg-gray-50 rounded">{formData.invoice.totalPackages}</p>
-            <p className="text-xs text-gray-500 mt-1">Auto-calculated from products</p>
+            {isEditing ? (
+              <input
+                type="text"
+                value={formData.invoice?.totalPackages || ''}
+                onChange={(e) => handleInputChange('invoice', 'totalPackages', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded"
+              />
+            ) : (
+              <p className="px-3 py-2 bg-gray-50 rounded">{formData.invoice?.totalPackages || 0}</p>
+            )}
           </div>
           
           <div className="mb-4">
